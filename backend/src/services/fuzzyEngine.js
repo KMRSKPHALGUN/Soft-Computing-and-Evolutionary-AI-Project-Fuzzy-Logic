@@ -17,8 +17,63 @@ function mfTrap(x, [a,b,c,d]) {
   return 0;
 }
 function degreeForSet(x, set) {
-  if (set.type === "trap") return mfTrap(x, set.params);
-  return mfTri(x, set.params);
+  const p = set.params;
+  switch (set.type) {
+    case "tri": {
+      const [a, b, c] = p;
+      if (x <= a || x >= c) return 0;
+      else if (x === b) return 1;
+      else if (x > a && x < b) return (x - a) / (b - a);
+      else if (x > b && x < c) return (c - x) / (c - b);
+      break;
+    }
+    case "trap": {
+      const [a, b, c, d] = p;
+      if (x <= a || x >= d) return 0;
+      else if (x >= b && x <= c) return 1;
+      else if (x > a && x < b) return (x - a) / (b - a);
+      else if (x > c && x < d) return (d - x) / (d - c);
+      break;
+    }
+    case "gauss": {
+      const [c, sigma] = p;
+      return Math.exp(-0.5 * Math.pow((x - c) / sigma, 2));
+      break;
+    }
+    case "gbell": {
+      const [a, b, c] = p;
+      return 1 / (1 + Math.pow(Math.abs((x - c) / a), 2 * b));
+      break;
+    }
+    case "sigmoid": {
+      const [a, c] = p;
+      return 1 / (1 + Math.exp(-a * (x - c)));
+      break;
+    }
+    case "zmf": {
+      const [a, b] = p;
+      if (x <= a) return 1;
+      else if (x >= b) return 0;
+      else if (x < (a + b) / 2)
+        return 1 - 2 * Math.pow((x - a) / (b - a), 2);
+      else
+        return 2 * Math.pow((b - x) / (b - a), 2);
+      break;
+    }
+
+    case "smf": {
+      const [a, b] = p;
+      if (x <= a) return 0;
+      else if (x >= b) return 1;
+      else if (x < (a + b) / 2)
+        return 2 * Math.pow((x - a) / (b - a), 2);
+      else
+        return 1 - 2 * Math.pow((b - x) / (b - a), 2);
+      break;
+    }
+    default:
+      return 0;
+  }
 }
 
 // Zadeh operators
@@ -78,18 +133,20 @@ export function evaluate(areaTerms, areaRules, crispInputs) {
     fired.push({ thenTermId: String(r.then.term), thenSet: r.then.setName, strength });
   }
 
-  // Aggregation on outputs (max per set)
-  const outAgg = {}; // outAgg[termId][setName] = μ
+  const outAgg = {};
   for (const f of fired) {
     outAgg[f.thenTermId] = outAgg[f.thenTermId] || {};
     outAgg[f.thenTermId][f.thenSet] = Math.max(outAgg[f.thenTermId][f.thenSet] || 0, f.strength);
   }
 
-  // Defuzzification per output term (weighted centroid of activated sets)
+  // Defuzzification per output term
   const crispOutputs = {};
+  const namedOutAgg = {};
   for (const [termId, setsMap] of Object.entries(outAgg)) {
     const term = termById.get(termId);
     if (!term) continue;
+    
+    // build crisp outputs
     let num = 0, den = 0;
     for (const [setName, strength] of Object.entries(setsMap)) {
       const set = term.sets.find(s => s.name === setName);
@@ -99,7 +156,15 @@ export function evaluate(areaTerms, areaRules, crispInputs) {
       den += strength;
     }
     crispOutputs[term.name] = den === 0 ? 0 : num / den;
+
+    // build fuzzy outputs with names
+    namedOutAgg[term.name] = setsMap;
   }
 
-  return { mu, fired, crispOutputs };
+  // Final return
+  return { mu, fired, outAgg: namedOutAgg, crispOutputs };
 }
+
+console.log("ZMF(15):", degreeForSet(15, {type:"zmf", params:[10,20]}));
+console.log("SMF(35):", degreeForSet(35, {type:"smf", params:[30,40]}));
+

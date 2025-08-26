@@ -19,7 +19,7 @@ export default function Evaluate({ area }) {
 
   return (
     <div style={{ border: "1px solid #ddd", padding: 12, borderRadius: 8, marginBottom: 16 }}>
-      <h2>Evaluate (Crisp → Fuzzy → Crisp)</h2>
+      <h2>Evaluate (Crisp to Fuzzy to Crisp)</h2>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         {terms.filter(t=>t.kind==="input").map(t => (
           <div key={t._id}>
@@ -34,6 +34,7 @@ export default function Evaluate({ area }) {
         <div style={{ marginTop: 12 }}>
           <div><b>Inputs:</b> {JSON.stringify(result.inputs)}</div>
           <div><b>Outputs (crisp):</b> {JSON.stringify(result.crispOutputs)}</div>
+          <div><b>Outputs (fuzzy set):</b> {JSON.stringify(result.outAgg)}</div>
         </div>
       )}
     </div>

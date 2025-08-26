@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import MembershipFunctionChart from "./MembershipFunctionChart";
 import api from "../api";
 
 export default function TermEditor({ area }) {
@@ -50,16 +51,22 @@ export default function TermEditor({ area }) {
 
       {terms.map(t => (
         <div key={t._id} style={{ border: "1px dashed #ccc", padding: 8, borderRadius: 6, marginTop: 8 }}>
-          <b>{t.name}</b> ({t.kind}) — sets: {t.sets.map(s => s.name).join(", ") || "none"}
+          <b>{t.name}</b> ({t.kind}) — sets: {t.sets.map(s => `${s.name} (${s.params.join(", ")})`).join(", ") || "none"}
           <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
             <input placeholder="Set name (e.g., Cold)" value={setNameStr} onChange={e=>setSetNameStr(e.target.value)} />
             <select value={setType} onChange={e=>setSetType(e.target.value)}>
               <option value="tri">Triangular [a,b,c]</option>
               <option value="trap">Trapezoidal [a,b,c,d]</option>
+              <option value="gauss">Gaussian [c, sigma]</option>
+              <option value="gbell">Generalized Bell [a, b, c]</option>
+              <option value="sigmoid">Sigmoid [a, b]</option>
+              <option value="zmf">Z-shape (ZMF) [a, b]</option>
+              <option value="smf">S-shape (SMF) [a, b]</option>
             </select>
             <input style={{ width: 220 }} placeholder="params comma sep" value={setParams} onChange={e=>setSetParams(e.target.value)} />
             <button onClick={()=>addSet(t)}>Add Set</button>
           </div>
+          <MembershipFunctionChart term={t} />
         </div>
       ))}
     </div>

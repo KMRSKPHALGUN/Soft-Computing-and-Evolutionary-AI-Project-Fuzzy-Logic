@@ -18,7 +18,7 @@ export default function App() {
 
   return (
     <div style={{ padding: 16, maxWidth: 1100, margin: "0 auto", fontFamily: "Inter, system-ui, sans-serif" }}>
-      <h1>Fuzzy DSS (Web-Based, per Paper)</h1>
+      <h1>Fuzzy DSS</h1>
       <AreaManager areas={areas} onCreated={loadAreas} activeArea={activeArea} onSelect={setActiveArea} />
 
       {activeArea && (
