@@ -14,7 +14,7 @@ const ThenSchema = new mongoose.Schema({
 const RuleSchema = new mongoose.Schema({
   area: { type: mongoose.Schema.Types.ObjectId, ref: "Area", required: true },
   if: [PremiseSchema],
-  then: ThenSchema,
+  then: [ThenSchema],
   weight: { type: Number, default: 1.0 } // optional rule weight
 }, { timestamps: true });
 

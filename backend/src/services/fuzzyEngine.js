@@ -130,7 +130,10 @@ export function evaluate(areaTerms, areaRules, crispInputs) {
       }
     }
     strength = Math.max(0, Math.min(1, strength * (r.weight ?? 1)));
-    fired.push({ thenTermId: String(r.then.term), thenSet: r.then.setName, strength });
+    for (const action of r.then) {  // r.then is now an array of {term, setName}
+      fired.push({ thenTermId: String(action.term), thenSet: action.setName, strength });
+    }
+
   }
 
   const outAgg = {};
@@ -164,7 +167,3 @@ export function evaluate(areaTerms, areaRules, crispInputs) {
   // Final return
   return { mu, fired, outAgg: namedOutAgg, crispOutputs };
 }
-
-console.log("ZMF(15):", degreeForSet(15, {type:"zmf", params:[10,20]}));
-console.log("SMF(35):", degreeForSet(35, {type:"smf", params:[30,40]}));
-
