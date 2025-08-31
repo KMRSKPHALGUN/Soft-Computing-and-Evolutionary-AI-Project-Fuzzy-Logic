@@ -84,15 +84,40 @@ const NOT = (x)   => 1 - x;
 // centroid of fuzzy set (approx via polygon centroid or params average as proxy)
 function centroidOfSet(set) {
   const p = set.params;
-  if (set.type === "trap") {
-    // approx centroid for trapezoid: average of vertices on x-axis weighted by plateau
-    const [a,b,c,d] = p;
-    return (a + b + c + d) / 4;
-  } else {
-    const [a,b,c] = p;
-    return (a + b + c) / 3;
+  switch (set.type) {
+    case "tri": {
+      const [a, b, c] = p;
+      return (a + b + c) / 3;
+    }
+    case "trap": {
+      const [a, b, c, d] = p;
+      return (a + b + c + d) / 4;
+    }
+    case "gauss": {
+      const [c, sigma] = p;
+      return c; // Gaussian is symmetric around c
+    }
+    case "gbell": {
+      const [a, b, c] = p;
+      return c; // symmetric around center c
+    }
+    case "sigmoid": {
+      const [a, c] = p;
+      return c; // inflection point
+    }
+    case "zmf": {
+      const [a, b] = p;
+      return (a + b) / 2; // midpoint of transition
+    }
+    case "smf": {
+      const [a, b] = p;
+      return (a + b) / 2; // midpoint of transition
+    }
+    default:
+      return 0; // safe fallback
   }
 }
+
 
 export function evaluate(areaTerms, areaRules, crispInputs) {
   // Build term map for quick lookup
